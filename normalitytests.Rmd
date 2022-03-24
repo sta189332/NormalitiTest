@@ -1,0 +1,718 @@
+---
+title: "SOME TEST OF NORMALITY"
+author: "Daniel James"
+date: "`r Sys.Date()`"
+output: html_document
+---
+  
+  ```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      comment = "",
+                      collapse = TRUE,
+                      echo = TRUE,
+                      error = TRUE, # do not interrupt in case of errors
+                      message = FALSE,
+                      warning = FALSE,
+                      comma <- function(x) format(x, digits = 2, big.mark = ",")
+)
+## Load packages and prepare multicore process
+library(pacman)
+p_load(nortest)
+p_load(moments)
+p_load(tseries)
+p_load(PoweR)
+p_load(AMR)
+p_load(tsoutliers)
+p_load(lawstat)
+p_load(dgof)
+p_load(nortest)
+```
+
+# Normal Distribution
+
+```{r simulate_Normal_Distribution, include=TRUE}
+set.seed(1)
+x <- rnorm(x, 0, 1)
+```
+
+
+
+## Jarque Bera test [jb] for NORMAL Dist
+
+```{r normjb, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,JarqueBeraTest(rnorm(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Robust Jarque-Bera Test [rjb] for NORMAL Dist
+
+```{r normrjb, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,rjb.test(rnorm(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Kolmogorov – Smirnov test [ks] for NORMAL Dist
+
+```{r normks, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,ks.test(rnorm(x),"pnorm"))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Shapiro-Francia method [sf] for NORMAL Dist
+
+```{r normsf, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,sf.test(rnorm(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Chi-square goodness of fit for normality test [gf] for NORMAL Dist
+
+```{r normgf, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,PearsonTest(rnorm(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+
+## Shapiro- wilk test [sw] for NORMAL Dist
+
+```{r normsw, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,shapiro.test(rnorm(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Anderson-Darling test [AD] for NORMAL Dist
+
+
+```{r normAD, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, ad.test(rnorm(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Bonett-Serial test[BS] for NORMAL Dist
+
+```{r normBS, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(factor(round(unlist(replicate(1000, 
+                                      bonett.test(rnorm(x)))["p.value",]), 2) 
+               != round(sqrt(2/pi),  2), levels = c(TRUE, FALSE)))))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Robust Jarque-Bera test [RJB] for NORMAL Dist
+
+```{r normRJB, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, jarque.bera.test(rnorm(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## D’Agostino- Pearson K2 test [DK] for NORMAL Dist
+
+```{r normDK, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, agostino.test(rnorm(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Skewness test for NORMAL Dist
+
+```{r normSKEWNESS, include=TRUE}
+skew.test <- function (x) {
+  m3 <- sum((x-mean(x))^3)/length(x)
+  s3 <- sqrt(var(x))^3
+  skew <- m3/s3
+  ses <- sqrt(6/length(x))
+  totest <- skew/ses
+  pt(totest,(length(x)-1))
+  pval <- pt(totest,(length(x)-1))
+  pval
+}
+
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, skew.test(rnorm(x))) < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Kurtosis tes for NORMAL Dist
+
+```{r normKURTOSIS, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x)
+  table(replicate(1000, kurtosis(rnorm(x)))-3 > 1)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Lilliefores (LL) Test for NORMAL Dist
+
+```{r normLL, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, lillie.test(rnorm(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Cramer–von Mises (CVM) test for NORMAL Dist
+
+```{r normCVM, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, cvm.test(rnorm(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+######################################################################################
+# BETA DIST
+
+```{r simulate_Beta_Distribution, include=TRUE}
+set.seed(1)
+x <- rbeta(x, shape1 = 2, shape2 = 8)
+```
+
+## Shapiro- wilk test [sw] for BETER Dist
+
+```{r beter_SW_B, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,shapiro.test(rbeta(n = x, shape1 = 2, shape2 = 8)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Anderson-Darling test [AD] for BETER Dist
+
+```{r beter_AD_B, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, ad.test(rbeta(n = x, shape1 = 2, shape2 = 8)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Bonett-Serial test[BS] for BETER Dist
+
+```{r beter_BS_B, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(factor(round(unlist(replicate(1000, 
+                                      bonett.test(rbeta(n = x, shape1 = 2, shape2 = 8)))["p.value",]), 2) 
+               != round(sqrt(2/pi),  2), levels = c(TRUE, FALSE)))))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Robust Jarque-Bera test [RJB] for BETER Dist
+
+```{r beter_RJB_B, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, jarque.bera.test(rbeta(n = x, shape1 = 2, shape2 = 8)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## D’Agostino- Pearson K2 test [DK] for BETER Dist
+```{r beter_DA_B, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, agostino.test(rbeta(n = x, shape1 = 2, shape2 = 8)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Skewness test for BETER Dist
+
+```{r beter_SKEWNESS_D, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x)   table(factor(abs(unlist(replicate(1000, skewness(rbeta(n = x, shape1 = 2, shape2 = 8))))) > 2, levels = c(TRUE, FALSE)))))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Kurtosis tes for BETER Dist
+
+```{r beter_KURTOSIS_B, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x)
+  table(replicate(1000, kurtosis(rbeta(n = x, shape1 = 2, shape2 = 8)))-3 > 1)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Lilliefores (LL) Test for gamma for BETER Dist
+
+```{r beter_LL_B, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, lillie.test(rbeta(n = x, shape1 = 2, shape2 = 8)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+
+## Jarque Bera test [jb]  for BETER Dist
+
+```{r beter_beter_jb, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,JarqueBeraTest(rbeta(x, shape1 = 2, shape2 = 8)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Robust Jarque-Bera Test [rjb] for BETER Dist
+
+```{r beter_rjb, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,rjb.test(rbeta(x, shape1 = 2, shape2 = 8)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Kolmogorov – Smirnov test [ks] for BETER Dist
+
+```{r beter_ks, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,ks.test(rbeta(x, shape1 = 2, shape2 = 8),"pnorm"))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Shapiro-Francia method [sf] for BETER Dist
+
+```{r beter_sf, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,sf.test(rbeta(x, shape1 = 2, shape2 = 8)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Chi-square goodness of fit for normality test [gf] for BETER Dist
+
+```{r beter_gf, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,PearsonTest(rbeta(x, shape1 = 2, shape2 = 8)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+##################################################################################################
+```{r simulate_Gamma_Distribution, include=TRUE}
+set.seed(1)
+x <- rgamma(x, shape = 3, rate =0.5)
+```
+
+## Jarque Bera test [jb]  for GAMMA Dist
+
+```{r gamma_jb, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,JarqueBeraTest(rgamma(n = x, shape = 3, rate = 0.5)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Robust Jarque-Bera Test [rjb] for GAMMA Dist
+
+```{r gamma_rjb, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,rjb.test(rgamma(n = x, shape = 3, rate = 0.5)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Kolmogorov – Smirnov test [ks] for GAMMA Dist
+
+```{r gamma_ks, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,ks.test(rgamma(n = x, shape = 3, rate = 0.5),"pnorm"))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Shapiro-Francia method [sf] for GAMMA Dist
+
+```{r gamma_sf, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,sf.test(rgamma(n = x, shape = 3, rate = 0.5)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Chi-square goodness of fit for normality test [gf] for GAMMA Dist
+
+```{r gamma_gf, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,PearsonTest(rgamma(n = x, shape = 3, rate = 0.5)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Shapiro- wilk test [sw] for GAMMA Dist
+
+```{r gamma_SW_G, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,shapiro.test(rgamma(n = x, shape = 3, rate = 0.5)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Anderson-Darling test [AD] for GAMMA Dist
+
+```{r gamma_AD_G, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, ad.test(rgamma(n = x, shape = 3, rate = 0.5)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Bonett-Serial test[BS] for GAMMA Dist
+
+```{r gamma_BS_G, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(factor(round(unlist(replicate(1000, 
+                                      bonett.test(rgamma(n = x, shape = 3, rate = 0.5)))["p.value",]), 2) 
+               != round(sqrt(2/pi),  2), levels = c(TRUE, FALSE)))))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Robust Jarque-Bera test [RJB] for GAMMA Dist
+
+```{r gamma_RJB_G, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, jarque.bera.test(rgamma(n = x, shape = 3, rate = 0.5)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## D’Agostino- Pearson K2 test [DK] for GAMMA Dist
+
+```{r gamma_DK_G, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, agostino.test(rgamma(n = x, shape = 3, rate = 0.5)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Skewness test for GAMMA Dist
+
+```{r gamma_SKEWNESS_G, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x)
+  table(abs(unlist(replicate(1000, skewness(rgamma(n = x, shape = 3, rate = 0.5))))) > 2)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Kurtosis tes for GAMMA Dist
+
+```{r gamma_KURTOSIS_G, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x)
+  table(replicate(1000, kurtosis(rgamma(n = x, shape = 3, rate = 0.5)))-3 > 1)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Lilliefores (LL) Test for GAMMA Dist
+
+```{r gamma_LL_G, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, lillie.test(rgamma(n = x, shape = 3, rate = 0.5)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Cramer–von Mises (CVM) test for GAMMA Dist
+
+```{r gamma_CVM_G, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, cvm.test(rgamma(n = x, shape = 3, rate = 0.5)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+######################################################################################
+
+# UNIFORM DIST for UNIFORM Dist
+
+```{r simulate_Uniform_Distribution, include=TRUE}
+set.seed(1)
+x <- runif(x)
+```
+
+
+## Jarque Bera test [jb]  for UNIFORM Dist
+
+```{r unif_jb, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,JarqueBeraTest(runif(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Robust Jarque-Bera Test [rjb] for UNIFORM Dist
+
+```{r unif_rjb, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,rjb.test(runif(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Kolmogorov – Smirnov test [ks] for UNIFORM Dist
+
+```{r unif_ks, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x)
+  table(replicate(1000,ks.test(runif(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Shapiro-Francia method [sf] for UNIFORM Dist
+
+```{r unif_sf, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,sf.test(runif(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Chi-square goodness of fit for normality test [gf] for UNIFORM Dist
+
+```{r unif_gf, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,PearsonTest(runif(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+
+
+## Shapiro- wilk test [sw] for UNIFORM Dist
+
+```{r unif_SW_U, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,shapiro.test(runif(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Anderson-Darling test [AD] for UNIFORM Dist
+
+```{r unif_AD_U, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, ad.test(runif(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Bonett-Serial test[BS] for UNIFORM Dist
+
+```{r unif_BS_U, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(factor(round(unlist(replicate(1000, 
+                                      bonett.test(runif(x)))["p.value",]), 2) 
+               != round(sqrt(2/pi),  2), levels = c(TRUE, FALSE)))))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Robust Jarque-Bera test [RJB] for UNIFORM Dist
+
+```{r unif_RJB_U, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, jarque.bera.test(runif(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## D’Agostino- Pearson K2 test [DK] for UNIFORM Dist
+```{r unif_DA_U, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, agostino.test(runif(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Skewness test for UNIFORM Dist
+
+```{r unif_SKEWNESS_U, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x)   table(factor(abs(unlist(replicate(1000, skewness(runif(x))))) > 2, levels = c(TRUE, FALSE)))))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Kurtosis tes for UNIFORM Dist
+
+```{r unif_KURTOSIS_U, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x)
+  table(replicate(1000, kurtosis(runif(x)))-3 > 1)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Lilliefores (LL) Test for gamma for UNIFORM Dist
+
+```{r unif_LL_U, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, lillie.test(runif(x)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+##################################################################################################
+# CHI-SQUARE DIST
+
+```{r simulate_Chisquare_Distribution, include=TRUE}
+set.seed(1)
+x <- rchisq(x, df = 2)
+```
+
+
+## Jarque Bera test [jb]  for CHI-SQUARE Dist
+
+```{r chisq_jb, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,JarqueBeraTest(rchisq(n = x, df = 2)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Robust Jarque-Bera Test [rjb] for CHI-SQUARE Dist
+
+```{r chisq_rjb, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,rjb.test(rchisq(n = x, df = 2)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Kolmogorov – Smirnov test [ks] for CHI-SQUARE Dist
+
+```{r chisq_ks, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,ks.test(rchisq(n = x, df = 2),"pnorm"))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Shapiro-Francia method [sf] for CHI-SQUARE Dist
+
+```{r chisq_sf, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,sf.test(rchisq(n = x, df = 2)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Chi-square goodness of fit for normality test [gf] for CHI-SQUARE Dist
+
+```{r chisq_gf, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,PearsonTest(rchisq(n = x, df = 2)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+
+
+## Shapiro- wilk test [sw] for CHI-SQUARE Dist
+
+```{r chisq_SW_CH, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000,shapiro.test(rchisq(n = x, df = 2)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Anderson-Darling test [AD] for CHI-SQUARE Dist
+
+```{r chisq_AD_CH, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, ad.test(rchisq(n = x, df = 2)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Bonett-Serial test[BS] for CHI-SQUARE Dist
+
+```{r chisq_BS_CH, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(factor(round(unlist(replicate(1000, 
+                                      bonett.test(rchisq(n = x, df = 2)))["p.value",]), 2) 
+               != round(sqrt(2/pi),  2), levels = c(TRUE, FALSE)))))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Robust Jarque-Bera test [RJB] for CHI-SQUARE Dist
+
+```{r chisq_RJB_CH, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, jarque.bera.test(rchisq(n = x, df = 2)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## D’Agostino- Pearson K2 test [DK] for CHI-SQUARE Dist
+```{r chisq_DA_CH, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, agostino.test(rchisq(n = x, df = 2)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Skewness test for CHI-SQUARE Dist
+
+```{r chisq_SKEWNESS_CH, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x)   table(factor(abs(unlist(replicate(1000, skewness(rchisq(n = x, df = 2))))) > 2, levels = c(TRUE, FALSE)))))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Kurtosis tes for CHI-SQUARE Dist
+
+```{r chisq_KURTOSIS_CH, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x)
+  table(replicate(1000, kurtosis(rchisq(n = x, df = 2)))-3 > 1)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+## Lilliefores (LL) Test for gamma for CHI-SQUARE Dist
+
+```{r chisq_LL_CH, include=TRUE}
+out <- t(sapply(c(10, 20, 50, 100), function(x) 
+  table(replicate(1000, lillie.test(rchisq(n = x, df = 2)))["p.value",] < 0.05)))
+row.names(out) <- c(10, 20, 50, 100)
+out
+```
+
+
+## Hypothesis Setting for Anderson-Darling Test
+
+|   $H_0$: The data are normally distributed 
+
+|   $H_1$: The data are not normally distributed
+
+
+
+
+## Decision Rule for Anderson-Darling Test
+
+|   Reject $H_0$: The data are normally distributed, if the the $P-Value of AD statistics is small, accept $H_1$: The data are not normally distributed otherwise.
+
+At $5\%$ significance level
+
+## Test Statistic: Anderson-Darling Test [AD]
+
+```{r simm, include = TRUE}
+agostino.test(x)
+```
+
+## Decision Rule for Anderson-Darling Test
+
+Take the decision for yourself
